@@ -15,7 +15,8 @@ export function convertAccount (json) {
   return account
 }
 
-export function convertTransaction (json, accounts) {
+export function convertTransaction (json) {
+  console.log(json)
   const transaction = {
     hold: json.type !== 'TRANSACTION',
     income: json.accountAmount.value > 0 ? json.accountAmount.value : 0,
