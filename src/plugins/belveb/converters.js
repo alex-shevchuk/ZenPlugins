@@ -1,13 +1,12 @@
 export function convertAccount (json) {
-  console.log(json)
   const account = {
-    id: json['@attributes'].id,
+    id: json.AcntContractId,
     type: 'card',
-    title: json['@attributes'].IBAN,
-    instrument: json['@attributes'].Curr,
-    balance: parseFloat(json['@attributes'].Amount.replace(/,/g, '.')),
+    title: json.CardName,
+    instrument: json.CurrName,
+    balance: parseFloat(json.Balance.replace(/,/g, '.')),
     creditLimit: 0,
-    syncID: [json['@attributes'].Number]
+    syncID: [json.iCardId]
   }
   if (!account.title) {
     account.title = '*' + account.syncID[0]
@@ -16,26 +15,19 @@ export function convertAccount (json) {
 }
 
 export function convertTransaction (json) {
-  console.log(json)
   const transaction = {
-    hold: json.type !== 'TRANSACTION',
-    income: json.accountAmount.value > 0 ? json.accountAmount.value : 0,
-    incomeAccount: json.relationId,
-    outcome: json.accountAmount.value < 0 ? -json.accountAmount.value : 0,
-    outcomeAccount: json.relationId,
-    date: new Date(json.operationTime)
+    date: new Date(json.TRANS_DATE),
+    movements: [{
+      id: json.DOC_ID.toString(),
+      account: { id: json.CARD_ID.toString() },
+      invoice: null,
+      sum: parseFloat(json.ACC_AMOUNT),
+      fee: 0
+    }],
+    merchant: null,
+    comment: json.TRANS_DETAILS,
+    hold: null
   }
-  if (!transaction.hold) {
-    transaction.id = json.id
-  }
-  if (json.accountAmount.currency.shortName !== json.amount.currency.shortName) {
-    if (json.amount.value > 0) {
-      transaction.opIncome = json.amount.value
-      transaction.opIncomeInstrument = json.amount.currency.shortName
-    } else {
-      transaction.opOutcome = -json.amount.value
-      transaction.opOutcomeInstrument = json.amount.currency.shortName
-    }
-  }
+
   return transaction
 }
