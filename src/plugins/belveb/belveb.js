@@ -52,18 +52,17 @@ export async function fetchTransactions (accounts, dateFrom, dateTo = null) {
     let income = transactions.returnObject.result.pfmDataPlus
     let outcomeOps = []
     let incomeOps = []
-    _.forEach(income, function (el) {
-      _.forEach(el, function (el2) {
-        incomeOps.push(el2)
+    _.forEach(income, function (incomeGroup) {
+      _.forEach(incomeGroup, function (incomeTransaction) {
+        incomeOps.push(incomeTransaction)
       })
     })
-    _.forEach(outcome, function (el) {
-      _.forEach(el, function (el2) {
-        outcomeOps.push(el2)
+    _.forEach(outcome, function (outcomeGroup) {
+      _.forEach(outcomeGroup, function (outcomeTransaction) {
+        outcomeOps.push(outcomeTransaction)
       })
     })
-
-    return _.assignIn(incomeOps, outcomeOps)
+    return _.union(outcomeOps, incomeOps)
   }))
 
   return _.flatMap(responses, function (el) { return el })
