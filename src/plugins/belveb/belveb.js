@@ -1,11 +1,18 @@
 // import moment from 'moment'
 import _ from 'lodash'
 import dirtyJson from 'dirty-json'
+import * as network from '../../common/network'
 
-// import * as network from '../../common/network'
-
-// const baseUrl = 'https://www.belveb24.by/'
+const baseUrl = 'https://www.belveb24.by/'
 // var querystring = require('querystring')
+async function fetchJson(queryString) {
+  let response = (await network.fetch(baseUrl + 'admin.php?xoadCall=true', {
+    method: 'POST',
+    body: queryString
+  }))
+
+  return dirtyJson.parse(response.body.replace(',"xroute":function(){return xoad.call(this,"xroute",arguments)}', ''))
+}
 
 export async function login (login, password) {
   // let response = await network.fetch(baseUrl + 'login.php', {
@@ -19,7 +26,6 @@ export async function login (login, password) {
   // })
 
   return ''
-  // return (await fetchJson('auth.json', null, response => response.body.access_token)).body.access_token
 }
 
 export async function fetchAccounts () {
