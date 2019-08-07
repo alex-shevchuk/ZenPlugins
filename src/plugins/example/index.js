@@ -12,5 +12,3 @@ export async function scrape ({ preferences, fromDate, toDate }) {
     transactions: transactions
   }
 }
-
-

@@ -25,8 +25,8 @@ export function convertTransaction (json) {
       location: null,
       fullTitle: json.TRANS_DETAILS
     },
-    comment: json.TRANS_DETAILS,
-    hold: null
+    comment: '',
+    hold: false
   }
   if (json.TRANS_CURR !== json.ACC_CURR) {
     transaction.movements.invoice = {
