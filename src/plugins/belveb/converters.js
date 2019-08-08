@@ -12,7 +12,7 @@ export function convertAccount (json) {
 
 export function convertTransaction (json) {
   let transaction = {
-    date: new Date(json.TRANS_DATE),
+    date: new Date(json.TRANS_DATE + '+0300'),
     movements: [{
       id: json.DOC_ID.toString(),
       account: { id: json.CARD_ID.toString() },

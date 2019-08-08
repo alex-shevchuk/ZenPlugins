@@ -37,31 +37,31 @@ export async function fetchAccounts () {
 }
 
 export async function fetchTransactions (accounts, dateFrom, dateTo = null) {
-  const accountsIds = _.flatMap(accounts, (el) => { return el.id })
-  console.log(accountsIds)
-  const responses = await Promise.all(accounts.map(async account => {
-    const accountIdLength = account.id.length
-    let dateFromFromatted = moment(dateFrom, 'YYYY-MM-DD').format('DD.MM.YYYY')
-    let dateToFromatted = !dateTo ? moment().format('DD.MM.YYYY') : moment(dateTo, 'YYYY-MM-DD').format('DD.MM.YYYY')
+  const accountsFilter = _.flatMap(accounts, (el, index) => {
+    return `i:${index};s:${el.id.length}:"${el.id}"`
+  })
 
-    let transactions = await fetchJson('a:4:{s:6:"source";s:77:"O:9:"connector":4:{s:6:"result";N;s:3:"lct";N;s:7:"message";N;s:5:"error";N;}";s:9:"className";s:9:"connector";s:6:"method";s:6:"xroute";s:9:"arguments";s:' + (226 + accountIdLength) + ':"a:2:{i:0;a:1:{s:11:"proxy.class";a:1:{s:10:"getPFMdata";a:6:{s:5:"range";N;s:4:"mode";s:5:"cards";s:5:"cards";a:1:{i:0;s:' + accountIdLength + ':"' + account.id + '";}s:8:"currency";s:3:"BYN";s:8:"dateFrom";s:10:"' + dateFromFromatted + '";s:6:"dateTo";s:10:"' + dateToFromatted + '";}}}i:1;N;}";}')
+  let dateFromFromatted = moment(dateFrom, 'YYYY-MM-DD').format('DD.MM.YYYY')
+  let dateToFromatted = !dateTo ? moment().format('DD.MM.YYYY') : moment(dateTo, 'YYYY-MM-DD').format('DD.MM.YYYY')
 
-    let outcome = transactions.returnObject.result.pfmData
-    let income = transactions.returnObject.result.pfmDataPlus
-    let outcomeOps = []
-    let incomeOps = []
-    _.forEach(income, function (incomeGroup) {
-      _.forEach(incomeGroup, function (incomeTransaction) {
-        incomeOps.push(incomeTransaction)
-      })
+  let filter = '"a:2:{i:0;a:1:{s:11:"proxy.class";a:1:{s:10:"getPFMdata";a:6:{s:5:"range";N;s:4:"mode";s:5:"cards";s:5:"cards";a:' + accounts.length + ':{' + accountsFilter.join(';') + ';}s:8:"currency";s:3:"BYN";s:8:"dateFrom";s:10:"' + dateFromFromatted + '";s:6:"dateTo";s:10:"' + dateToFromatted + '";}}}i:1;N;}"'
+
+  let transactions = await fetchJson('a:4:{s:6:"source";s:77:"O:9:"connector":4:{s:6:"result";N;s:3:"lct";N;s:7:"message";N;s:5:"error";N;}";s:9:"className";s:9:"connector";s:6:"method";s:6:"xroute";s:9:"arguments";s:' + (filter.length - 2) + ':' + filter + ';}')
+
+  let outcome = transactions.returnObject.result.pfmData
+  let income = transactions.returnObject.result.pfmDataPlus
+  let outcomeOps = []
+  let incomeOps = []
+  _.forEach(income, function (incomeGroup) {
+    _.forEach(incomeGroup, function (incomeTransaction) {
+      incomeOps.push(incomeTransaction)
     })
-    _.forEach(outcome, function (outcomeGroup) {
-      _.forEach(outcomeGroup, function (outcomeTransaction) {
-        outcomeOps.push(outcomeTransaction)
-      })
+  })
+  _.forEach(outcome, function (outcomeGroup) {
+    _.forEach(outcomeGroup, function (outcomeTransaction) {
+      outcomeOps.push(outcomeTransaction)
     })
-    return _.union(outcomeOps, incomeOps)
-  }))
-
-  return _.flatMap(responses, function (el) { return el })
+  })
+  console.log(_.union(outcomeOps, incomeOps))
+  return _.union(outcomeOps, incomeOps)
 }
